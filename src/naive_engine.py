@@ -76,7 +76,7 @@ def rms_norm(x: torch.Tensor, weight: torch.Tensor, eps: float) -> torch.Tensor:
 def build_rope_cache(seq_len: int, head_dim: int, theta: float, device, dtype):
     """预计算 cos/sin 表：shape [seq_len, head_dim/2]"""
     inv_freq = 1.0 / (theta ** (torch.arange(0, head_dim, 2, device=device).float() / head_dim))
-    t = torch.arrange(seq_len, device=device).float()
+    t = torch.arange(seq_len, device=device).float()
     freqs = torch.outer(t, inv_freq)  # [seq_len, head_dim/2]
     return freqs.cos().to(dtype), freqs.sin().to(dtype)  # [seq_len, head_dim/2], [seq_len, head_dim/2]
 
@@ -254,7 +254,7 @@ def sample(logits: torch.Tensor, temperature: float = 0.0, top_k: int = 0) -> in
 # 生成循环（prefill + decode，带 KV Cache）
 @torch.no_grad()
 def generate(
-    model: NaiveLlama, promt_ids: list[int], max_new_tokens: int = 20,
+    model: NaiveLlama, prompt_ids: list[int], max_new_tokens: int = 20,
     temperature: float = 0.0, top_k: int = 0, verbose: bool = True):
     cfg = model.cfg
     device = model.device
@@ -334,7 +334,7 @@ def main():
 
     dtype = getattr(torch, args.dtype)
     cfg = LlamaConfig.from_json(args.model)
-    print(f"配置: L={cfg.num_hidden_layers} H={cfg.num_attention_heads} "
+    print(f"配置: L={cfg.num_hidden_layers} H={cfg.num_attn_heads} "
           f"Hkv={cfg.num_key_value_heads} D={cfg.head_dim} V={cfg.vocab_size}")
 
     t0 = time.perf_counter()
